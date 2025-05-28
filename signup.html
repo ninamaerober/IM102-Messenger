@@ -6,7 +6,7 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #5e9fff;
+      background: lightgray;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -137,7 +137,6 @@
       return;
     }
 
-    // Sign up user with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password
@@ -149,7 +148,6 @@
     } else {
       const userId = authData.user.id;
 
-      // Insert user info into the users table
       const { error: insertError } = await supabase.from('users').insert([{
         fullname,
         username,
@@ -168,7 +166,7 @@
       messageEl.classList.add('success');
 
       setTimeout(() => {
-        window.location.href = 'login.html'; // Redirect after successful signup
+        window.location.href = 'login.html'; 
       }, 2000);
     }
   });
