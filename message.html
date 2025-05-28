@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Messaging</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    body {
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #333;
+    }
+
+    .container {
+      background: #fff;
+      max-width: 650px;
+      width: 90%;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      padding: 2rem 2.5rem 3rem;
+      position: relative;
+    }
+
+    /* Back icon top-left */
+    .back-icon {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      color: #667eea;
+      font-weight: 600;
+      font-size: 1rem;
+      user-select: none;
+      transition: color 0.3s ease;
+      text-decoration: none;
+    }
+    .back-icon:hover {
+      color: #764ba2;
+    }
+    .back-icon svg {
+      width: 22px;
+      height: 22px;
+      margin-right: 8px;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    h2 {
+      text-align: center;
+      color: #4a4a4a;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      font-size: 2rem;
+      user-select: none;
+    }
+
+    .search-section,
+    .message-section,
+    .send-section {
+      margin-bottom: 2rem;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #555;
+      user-select: none;
+    }
+
+    input[type="text"], select, textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border-radius: 12px;
+      border: 1.8px solid #ddd;
+      transition: border-color 0.3s ease;
+      font-family: inherit;
+      box-sizing: border-box;
+      outline-offset: 2px;
+    }
+    input[type="text"]:focus, select:focus, textarea:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 8px rgba(102, 126, 234, 0.4);
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="%236677ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polyline points="6 9 12 15 18 9"></polyline></svg>') no-repeat right 16px center / 20px 20px;
+      padding-right: 2.5rem;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+      font-size: 1rem;
+    }
+
+    button {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 14px;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.4s ease;
+      box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
+      user-select: none;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #5a6bdc, #633f91);
+      box-shadow: 0 12px 20px rgba(99, 63, 145, 0.4);
+    }
+
+    .messages-list {
+      max-height: 320px;
+      overflow-y: auto;
+      background: #f9f9ff;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: inset 0 0 10px rgba(118, 75, 162, 0.1);
+      border: 1px solid #ddd;
+      font-size: 1rem;
+    }
+    .message-item {
+      padding: 0.8rem 1rem;
+      border-radius: 14px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+      transition: background 0.3s ease;
+    }
+    .message-item:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Sender vs Receiver message colors */
+    .message-header {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #764ba2;
+      margin-bottom: 0.3rem;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .message-content {
+      margin: 0;
+      font-size: 1rem;
+      color: #444;
+      white-space: pre-wrap;
+      user-select: text;
+    }
+
+    .reply-info {
+      font-size: 0.8rem;
+      color: #a58fdc;
+      margin-bottom: 0.3rem;
+      font-style: italic;
+      user-select: none;
+    }
+
+    #statusMessage {
+      text-align: center;
+      margin-top: 0.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      user-select: none;
+      min-height: 1.2em;
+      transition: color 0.3s ease;
+    }
+    .error {
+      color: #e63946;
+    }
+    .success {
+      color: #2a9d8f;
+    }
+
+    /* Scrollbar styling */
+    .messages-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    .messages-list::-webkit-scrollbar-thumb {
+      background: #764ba2;
+      border-radius: 12px;
+    }
+    .messages-list::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 12px;
+    }
+    .message-item.sent,
+    .message-item.received {
+      max-width: 80%;
+      width: fit-content;
+      word-wrap: break-word;
+    }
+
+    /* Retain alignment and styling */
+    .message-item.sent {
+      background: #e0e7ff;
+      margin-left: auto;
+      text-align: right;
+      border-top-right-radius: 0;
+    }
+
+    .message-item.received {
+      background: #f3f0ff;
+      margin-right: auto;
+      text-align: left;
+      border-top-left-radius: 0;
+    }
+
+    .recent-chats-section {
+        margin-bottom: 2rem;
+    }
+
+    .recent-chats-list {
+      max-height: 140px;
+      overflow-y: auto;
+      background: #f0f0ff;
+      border-radius: 12px;
+      padding: 0.5rem;
+      box-shadow: inset 0 0 8px rgba(102, 126, 234, 0.2);
+      border: 1px solid #ccc;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      background: white;
+      margin-bottom: 0.5rem;
+      box-shadow: 0 2px 6px rgba(102, 126, 234, 0.1);
+      transition: background-color 0.2s ease;
+    }
+    .chat-item:hover {
+      background-color: #dbe2ff;
+    }
+
+    .chat-item.active {
+      background-color: #a2aaff;
+      color: white;
+    }
+
+    .chat-username {
+      font-weight: 600;
+      user-select: none;
+      /* Allow username to take up available space */
+      flex-grow: 1;
+    }
+
+    .unread-badge {
+      background: red;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 7px;
+      margin-left: 8px; /* Add margin-left for spacing */
+      font-size: 0.75rem;
+      vertical-align: middle;
+      min-width: 22px; /* Ensure a minimum width for single digits */
+      text-align: center; /* Center the number */
+      display: inline-block; /* Treat as block for width/height */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="login.html" class="back-icon" title="Back to Profile">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+      logout
+    </a>
+
+    <h2>Messaging</h2>
+
+    <div class="search-section">
+      <label for="searchUser">Search Users by Username:</label>
+      <input type="text" id="searchUser" placeholder="Enter username to search" autocomplete="off" />
+      <select id="userSelect" aria-label="Select user to message">
+        <option value="">-- Select a user to message --</option>
+      </select>
+    </div>
+
+    <div class="message-section">
+      <h3>Messages</h3>
+      <div class="messages-list" id="messagesList" aria-live="polite" aria-relevant="additions"></div>
+    </div>
+
+    <div class="send-section">
+      <label for="messageContent">Write your message:</label>
+      <textarea id="messageContent" placeholder="Type your message here..." aria-multiline="true"></textarea>
+      <button id="sendMessageBtn" type="button" aria-label="Send message">Send Message</button>
+    </div>
+
+    <div id="statusMessage" role="alert" aria-live="assertive"></div>
+  </div>
+<!-- Keep your existing styles, except add this to fix messages-list p styling -->
+<style>
+  .messages-list p {
+    margin: 0.5rem 0;
+    color: #666;
+    font-style: italic;
+  }
+</style>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const supabaseUrl = 'https://vjvqbuiftilfvilnfyxv.supabase.co'
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqdnFidWlmdGlsZnZpbG5meXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0MTQzMTUsImV4cCI6MjA2Mzk5MDMxNX0.R2TFfnfLnPh817_3DC9jrm0C3FOxi1eGq4zzxfu-Rvo'
+  const supabase = createClient(supabaseUrl, supabaseKey)
+
+  const searchUserInput = document.getElementById('searchUser');
+  const userSelect = document.getElementById('userSelect');
+  const messagesList = document.getElementById('messagesList');
+  const messageContentInput = document.getElementById('messageContent');
+  const sendMessageBtn = document.getElementById('sendMessageBtn');
+  const statusMessage = document.getElementById('statusMessage');
+  const recentChatsList = document.getElementById('recentChatsList');
+
+  let currentUser = null;
+  let selectedUserId = null;
+  let messageSubscription = null;
+
+  function showStatus(text, isError = false) {
+    statusMessage.textContent = text;
+    statusMessage.className = isError ? 'error' : 'success';
+    if (!isError) {
+      setTimeout(() => {
+        statusMessage.textContent = '';
+        statusMessage.className = '';
+      }, 3000);
+    }
+  }
+
+  async function getCurrentUser() {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error || !session) {
+      alert('You must be logged in to use messaging.');
+      window.location.href = 'login.html';
+      return null;
+    }
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id, fullname, username, email')
+      .eq('email', session.user.email)
+      .single();
+
+    if (userError || !userData) {
+      alert('Error fetching user profile.');
+      window.location.href = 'login.html';
+      return null;
+    }
+    return userData;
+  }
+
+  async function searchUsers(username) {
+    if (!username) {
+      userSelect.innerHTML = '<option value="">-- Select a user to message --</option>';
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, username')
+      .ilike('username', username + '%')
+      .limit(10);
+
+    if (error) {
+      showStatus('Error loading users.', true);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      userSelect.innerHTML = '<option value="">No users found</option>';
+      return;
+    }
+
+    userSelect.innerHTML = '<option value="">-- Select a user to message --</option>';
+    data.forEach(user => {
+      if (currentUser && String(user.id) !== String(currentUser.id)) {
+        const option = document.createElement('option');
+        option.value = user.id;
+        option.textContent = user.username;
+        userSelect.appendChild(option);
+      }
+    });
+  }
+
+  async function fetchMessages() {
+  if (!selectedUserId) {
+    messagesList.innerHTML = '<p>Select a user to see messages.</p>';
+    return;
+  }
+  if (!currentUser) {
+    messagesList.innerHTML = '<p>Loading user info...</p>';
+    return;
+  }
+
+  messagesList.innerHTML = '<p>Loading messages...</p>';
+
+  const senderId = String(currentUser.id);
+  const receiverId = String(selectedUserId);
+
+  const { data: messages, error } = await supabase
+    .from('messages')
+    .select('*')
+    .or(`and(sender_id.eq.${senderId},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${senderId})`)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    messagesList.innerHTML = `<p class="error">Error loading messages: ${error.message}</p>`;
+    return;
+  }
+
+  // Fetch all relevant user IDs (excluding current user who is already known)
+  const userIds = [...new Set(messages.map(m => m.sender_id).filter(id => id !== currentUser.id))];
+  const userMap = {};
+
+  if (userIds.length > 0) {
+    const { data: usersData } = await supabase
+      .from('users')
+      .select('id, username')
+      .in('id', userIds);
+    if (usersData) {
+      usersData.forEach(user => {
+        userMap[user.id] = user.username;
+      });
+    }
+  }
+
+  messagesList.innerHTML = '';
+
+  messages.forEach(msg => {
+    const isSender = String(msg.sender_id) === senderId;
+    const div = document.createElement('div');
+    div.className = `message-item ${isSender ? 'sent' : 'received'}`;
+
+    const senderName = isSender ? 'You' : userMap[msg.sender_id] || 'Unknown';
+    const content = msg.content || '';
+    const date = new Date(msg.created_at).toLocaleString();
+
+    let replyText = '';
+    if (msg.reply_to) {
+      replyText = `<div class="reply-info">Replying to message #${msg.reply_to}</div>`;
+    }
+
+    div.innerHTML = `
+      <div class="message-header">
+        <span>${senderName}</span>
+        <small>${date}</small>
+      </div>
+      ${replyText}
+      <p class="message-content">${content}</p>
+    `;
+    messagesList.appendChild(div);
+  });
+
+  messagesList.scrollTop = messagesList.scrollHeight;
+}
+
+
+  async function sendMessage() {
+    if (!currentUser) {
+      alert('User data not loaded. Please refresh the page.');
+      return;
+    }
+
+    const content = messageContentInput.value.trim();
+    if (!content) {
+      alert('Please enter a message.');
+      return;
+    }
+    if (!selectedUserId) {
+      alert('Please select a user to send a message.');
+      return;
+    }
+
+    const senderId = String(currentUser.id);
+    const receiverId = String(selectedUserId);
+
+    const { data, error } = await supabase
+      .from('messages')
+      .insert([
+        {
+          sender_id: senderId,
+          receiver_id: receiverId,
+          content,
+          created_at: new Date().toISOString(),
+          is_read: false // Mark as unread by default when sent
+        }
+      ]);
+
+    if (error) {
+      showStatus('Failed to send message.', true);
+      return;
+    }
+
+    messageContentInput.value = '';
+    await fetchMessages();
+    showStatus('Message sent!');
+  }
+
+  async function loadRecentChats() {
+    if (!currentUser) return;
+
+    const currentUserId = String(currentUser.id);
+
+    const { data, error } = await supabase
+      .rpc('get_recent_chats', { current_user_id: currentUserId });
+
+    if (error) {
+      recentChatsList.innerHTML = `<p class="error">Failed to load recent chats: ${error.message}</p>`;
+      console.error('Failed to load recent chats:', error);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      recentChatsList.innerHTML = '<p>No recent chats found.</p>';
+      return;
+    }
+
+    recentChatsList.innerHTML = '';
+    data.forEach(user => {
+      const chatItem = document.createElement('div');
+      chatItem.className = 'chat-item';
+      chatItem.dataset.userid = user.id;
+
+      const usernameSpan = document.createElement('span');
+      usernameSpan.className = 'chat-username';
+      usernameSpan.textContent = user.username;
+      chatItem.appendChild(usernameSpan);
+
+      if (user.unread_count > 0) {
+        const badge = document.createElement('span');
+        badge.className = 'unread-badge';
+        badge.textContent = user.unread_count;
+        chatItem.appendChild(badge);
+      }
+
+      chatItem.addEventListener('click', async () => {
+        selectedUserId = String(chatItem.dataset.userid);
+        userSelect.value = selectedUserId;
+        document.querySelectorAll('.chat-item').forEach(item => {
+          item.classList.remove('active');
+        });
+        chatItem.classList.add('active');
+        await fetchMessages();
+        await markMessagesRead(selectedUserId);
+      });
+
+      recentChatsList.appendChild(chatItem);
+    });
+  }
+
+  async function markMessagesRead(fromUserId) {
+    if (!currentUser || !fromUserId) return;
+
+    const currentUserId = String(currentUser.id);
+    const senderId = String(fromUserId);
+
+    const { error } = await supabase
+      .from('messages')
+      .update({ is_read: true })
+      .eq('receiver_id', currentUserId)
+      .eq('sender_id', senderId)
+      .eq('is_read', false);
+
+    if (error) {
+      console.error('Failed to mark messages as read:', error);
+    } else {
+      await loadRecentChats(); // Refresh unread counts
+    }
+  }
+
+  async function subscribeToMessages() {
+    if (messageSubscription) {
+      await supabase.removeChannel(messageSubscription);
+      messageSubscription = null;
+    }
+
+    messageSubscription = supabase.channel('public:messages')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+        const msg = payload.new;
+        if (!currentUser) return;
+
+        const userId = String(currentUser.id);
+        if (String(msg.sender_id) === userId || String(msg.receiver_id) === userId) {
+          if (
+            selectedUserId === String(msg.sender_id) ||
+            selectedUserId === String(msg.receiver_id)
+          ) {
+            fetchMessages();
+            markMessagesRead(selectedUserId);
+          }
+          loadRecentChats();
+        }
+      })
+      .subscribe();
+
+    console.log('Subscribed to message inserts');
+  }
+
+  // Event listeners
+  searchUserInput.addEventListener('input', () => {
+    searchUsers(searchUserInput.value.trim());
+  });
+
+  userSelect.addEventListener('change', async () => {
+    selectedUserId = userSelect.value || null;
+    if (selectedUserId) {
+      await fetchMessages();
+      await markMessagesRead(selectedUserId);
+    } else {
+      messagesList.innerHTML = '<p>Please select a user to view messages.</p>';
+    }
+  });
+
+  sendMessageBtn.addEventListener('click', sendMessage);
+
+  // Initialization
+  (async () => {
+    currentUser = await getCurrentUser();
+    if (!currentUser) return;
+
+    await loadRecentChats();
+    await subscribeToMessages();
+
+    // Initial user search (empty)
+    searchUsers('');
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login</title>
+  <style>
+    /* Same styling as in sign-up, for consistency */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #5e9fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Changed height to min-height for better content handling */
+  margin: 0; /* Added margin reset */
+}
+
+.container {
+  background: white;
+  padding: 2rem 3rem;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 320px;
+  max-width: 90%; /* Added max-width for responsiveness on smaller screens */
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: #555;
+  font-weight: 600;
+}
+
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 0.7rem 0.9rem; /* Slightly increased padding for better touch targets */
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  border-color: #0070f3;
+  outline: none;
+}
+
+button {
+  width: 100%;
+  padding: 0.8rem; /* Slightly increased padding for better touch targets */
+  background-color: #0070f3;
+  color: white;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #005bb5;
+}
+
+.message {
+  margin-top: 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.message.error {
+  color: #e63946;
+}
+
+.message.success {
+  color: #2a9d8f;
+}
+
+.signup-link {
+  margin-top: 1rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.signup-link a {
+  color: #0070f3;
+  text-decoration: none;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Login</h2>
+  <form id="loginForm">
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" required />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required />
+
+    <button type="submit">Login</button>
+  </form>
+  <div id="message" class="message"></div>
+  <div class="signup-link">
+    Don't have an account? <a href="signup.html">Sign up</a>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const supabaseUrl = 'https://vjvqbuiftilfvilnfyxv.supabase.co'
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqdnFidWlmdGlsZnZpbG5meXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0MTQzMTUsImV4cCI6MjA2Mzk5MDMxNX0.R2TFfnfLnPh817_3DC9jrm0C3FOxi1eGq4zzxfu-Rvo'
+  const supabase = createClient(supabaseUrl, supabaseKey)
+
+  // Get form and message elements
+  const form = document.getElementById('loginForm');
+  const messageEl = document.getElementById('message');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    messageEl.textContent = '';
+    messageEl.className = 'message';
+
+    // Get form data
+    const email = form.email.value.trim();
+    const password = form.password.value;
+
+    // Validation
+    if (!email || !password) {
+      messageEl.textContent = 'Please fill out all fields.';
+      messageEl.classList.add('error');
+      return;
+    }
+
+    try {
+      // Attempt login with Supabase Auth
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        messageEl.textContent = 'Error: ' + error.message;
+        messageEl.classList.add('error');
+      } else {
+        messageEl.textContent = 'Logged in successfully!';
+        messageEl.classList.add('success');
+        setTimeout(() => {
+          window.location.href = 'message.html'; // Redirect to profile page after login
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      messageEl.textContent = 'Unexpected error occurred.';
+      messageEl.classList.add('error');
+    }
+  });
+  
+</script>
+
+</body>
+</html>
